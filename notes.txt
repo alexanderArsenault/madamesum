@@ -1,0 +1,28 @@
+﻿Features:
+        -Zipcode Selector
+        -Checkout process reworking
+        -Multiple Locations in checkout (a la dieci)
+        -API Integrations
+                - Tracking  
+                        -Online shop (squarespace)
+                        -checkout via stripe
+                        -physical store receives order from sumup
+                        -would rather use square as a pos in the store, used for inventory managment as well
+                        -there will be a delivery software asap, considering umptly
+                        -really they do order tracking,
+                        -self delivery for the time being,
+                        -they prepare, see where and when it goes, they ship it,
+                        -customer receives email, sees tracking, onfleet does this with integration,
+                - Loyalty Program
+
+        -open shop
+        -enter zipcode
+        -click deliver
+        -view shop
+        -can see the cart as it fills up
+        -product details and text
+        -you'll have sauces available
+        -checkout page move to homepage
+        -select shipping option time and date
+	-twint squarespace
+	-show next available shipment 
