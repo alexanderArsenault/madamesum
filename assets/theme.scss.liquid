@@ -9191,22 +9191,64 @@ $fast-drawer-transition: transform 0.55s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 // Page Template
 
-#our-story {
-  .slideshow {
-    max-height: 60vh;
+
+.madamesum-button {
+  background-color: #fff;
+  font-size: 12px;
+  padding: 10px 20px;
+  border: 1px solid black;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #000;
+  &:hover {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #fff;
   }
 }
 
-.two-col-container {
+.template-page .main-content {
+  .slideshow {
+    max-height: 74vh;
+  }
+  .page-width {
+    max-width: 900px;
+  }
   h1 {
     text-transform: uppercase;
     text-align: center;
     font-size: 28px;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
     font-weight: 600;
   }
+  .page-image {
+    width: 100%;
+    height: auto;
+    background-size: cover;
+  }
+}
+
+.section-image-text {
+  .image-text--container {
+    margin-top: 40px;
+  }
+  .madamesum-button {
+    margin-top: 50px;
+    display: inline-block;
+  }
+}
+
+
+.two-col-container {
   .two-col-text {
     column-count: 2;
     column-gap: 40px;
+    @include media-query($small) {
+      column-count: 1;
+    }
   }
+}
+
+.hero--madamesum-divider {
+  height: 130px;
 }

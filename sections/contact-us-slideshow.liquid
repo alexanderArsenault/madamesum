@@ -1,0 +1,536 @@
+{%- if section.settings.show_overlay -%}
+  <style>
+    #Slideshow-{{ section.id }} .slideshow__overlay::before {
+      background-color: {{ section.settings.overlay_color }};
+      opacity: {{ section.settings.overlay_opacity | divided_by: 100.00 }};
+    }
+
+    #Slideshow-{{ section.id }} .slideshow__heading,
+    #Slideshow-{{ section.id }} .slideshow__button-label {
+      color: {{ section.settings.overlay_text }};
+    }
+  </style>
+{%- endif -%}
+
+{%- assign first_block = section.blocks[0] -%}
+
+{%- comment -%}
+  A centered call to action button is displayed if the corresponding setting is
+  enabled or if there is just one slide with a call to action button.
+{%- endcomment -%}
+{%- assign show_center_cta = section.settings.center_cta -%}
+{%- if section.blocks.size == 1 and first_block.settings.cta_link != blank -%}
+  {%- assign show_center_cta = true -%}
+{%- endif -%}
+
+{%- if section.settings.slider_height == 'adapt' -%}
+  {%- comment -%}
+    'min_aspect_ratio' is the minimum aspect ratio of images shown without
+    whitespace when 'home_hero_height' is set to 'adapt'.
+    The aspect ratio values for the first image in the slideshow will be used
+    unless it is blank, in that case a ratio of 2:1 will be used.
+  {%- endcomment -%}
+
+  {%- if first_block.type == 'video' -%}
+    {%- assign min_aspect_ratio = 16 | divided_by: 9.0 -%}
+  {%- elsif first_block.settings.image.aspect_ratio == blank -%}
+    {%- assign min_aspect_ratio = 2.0 -%}
+  {%- else -%}
+    {%- assign min_aspect_ratio = first_block.settings.image.aspect_ratio -%}
+  {%- endif -%}
+  {%- assign wrapper_height = 100 | divided_by: min_aspect_ratio -%}
+  {%- style -%}
+    #Slideshow-{{ section.id }} {
+      height: {{- wrapper_height -}}vw;
+    }
+  {%- endstyle -%}
+{%- endif -%}
+
+<div class="slideshow--{{ section.settings.slider_height }}{% if show_center_cta %} slideshow--center-cta{% endif %}" data-section-id="{{ section.id }}" data-section-type="slideshow-section">
+  <div id="Slideshow-{{ section.id }}"
+       class="slideshow"
+       role="region"
+       aria-describedby="slideshow-info"
+       tabindex="-1"
+       aria-label="slideshow">
+    {%- if section.blocks.size > 0 -%}
+      <ul class="slideshow__slides">
+
+        {%- for block in section.blocks -%}
+          <li class="slideshow__slide slideshow__slide--{{ block.id }}{% if forloop.first %} slideshow__slide--active{% endif %}{% if section.settings.show_overlay %} slideshow__overlay{% endif %}"
+              id="Slide{{ forloop.index0 }}"
+              {% unless forloop.first %}aria-hidden="true"{% endunless %}
+              {{ block.shopify_attributes }}>
+            {%- if block.settings.image == blank -%}
+              <div class="slideshow__image slideshow__image--{{ block.id }}">
+                <div class="placeholder-background">
+                  {% capture current %}{% cycle 1, 2 %}{% endcapture %}
+                  {{ 'lifestyle-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              </div>
+            {%- else -%}
+              {%- assign img_url = block.settings.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+
+              <style>
+                .slideshow__image--{{ block.id }} {
+                  object-position: {{ block.settings.alignment }};
+                  font-family: "object-fit: cover; object-position: {{ block.settings.alignment }};";
+                }
+              </style>
+
+              <img class="slideshow__image slideshow__image--{{ block.id }} lazyload"
+                  src="{{ block.settings.image | img_url: '300x' }}"
+                  data-src="{{ img_url }}"
+                  data-widths="[540, 720, 900, 1080, 1296, 1512, 1728, 1944, 2048]"
+                  data-aspectratio="{{ block.settings.image.aspect_ratio }}"
+                  data-sizes="auto"
+                  data-parent-fit="cover"
+                  alt="{{ block.settings.image.alt | escape }}">
+            {%- endif -%}
+
+            {%- if block.type == 'video' and block.settings.video_url != blank -%}
+              <div class="slideshow__video slideshow__video--{{ block.id }}"
+                data-video-type="{{ block.settings.video_url.type }}"
+                data-video-id="{{ block.settings.video_url.id }}"
+                data-block-id="{{ block.id }}"></div>
+            {%- endif -%}
+
+            <div class="slideshow__text-container page-width">
+              {%- if block.type == 'video' -%}
+                <button class="slideshow__play-button btn btn--clear"
+                        disabled
+                        aria-live="polite"
+                        aria-label="{{ 'sections.slider.pause' | t }}"
+                        aria-pressed="false"
+                        data-label-pause="{{ 'sections.slider.pause' | t }}"
+                        data-label-play="{{ 'sections.slider.play' | t }}"
+                        data-pause-button>
+                  <span class="visually-hidden" data-play-label>{{ 'video.play' | t }}</span>
+                  <span class="slideshow__play-button-icon"></span>
+                  <span class="slideshow__play-button-circle"></span>
+                </button>
+              {%- endif -%}
+              <div class="slideshow__text-content" data-animate>
+                {%- if block.settings.title != blank -%}
+                  <h2 class="slideshow__heading h1">
+                    {{ block.settings.title | escape }}
+                  </h2>
+                {%- endif -%}
+                {%- if show_center_cta and block.settings.cta_link != blank -%}
+                  <a href="{{ block.settings.cta_link }}" class="slideshow__heading-cta btn{% if section.blocks.size == 1 and section.settings.slider_height == 'adapt' %} small--hide{% endif %}">
+                    {{ block.settings.cta | escape }}
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <div class="slideshow__image slideshow__image--{{ block.id }}{% if section.settings.show_overlay %} slideshow__overlay{% endif %}">
+        <div class="placeholder-background">
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 1 -%}
+      <div class="slideshow__buttons critical-hide" data-count="{{ section.blocks.size }}">
+        {%- for block in section.blocks -%}
+          <div class="slideshow__button slideshow__button--{{ section.blocks.size }}{% if block.settings.cta_link != blank %} slideshow__button--link{% endif %}">
+            <button class="slideshow__button-label text-title btn--clear">
+              <span class="visually-hidden">{{ 'sections.slider.slide' | t: number: forloop.index }}</span>
+              <span class="slideshow__button-label-text">{{ block.settings.button }}</span>
+            </button>
+            {%- unless section.settings.center_cta -%}
+              {%- if block.settings.cta_link != blank -%}
+                <a href="{{ block.settings.cta_link }}" class="slideshow__button-cta slideshow__button-cta--multiple medium-up--hide btn" tabindex="-1">
+                  <span class="visually-hidden">{{ block.settings.cta | escape }}</span>
+                  {% include 'icon-plus' %}
+                </a>
+              {%- else -%}
+                <div class="slideshow__button-cta slideshow__button-cta--multiple medium-up--hide btn" tabindex="-1">
+                  <span class="visually-hidden">{{ block.settings.cta | escape }}</span>
+                  {% include 'icon-plus' %}
+                </div>
+              {%- endif -%}
+
+              {%- if block.settings.cta_link != blank -%}
+                <a href="{{ block.settings.cta_link }}" class="slideshow__button-cta slideshow__button-cta--desktop small--hide btn" aria-label="{{ block.settings.cta | escape }}" tabindex="-1">
+                  <span class="slideshow__heading-cta-text" data-button-text="{{ block.settings.cta | escape }}" aria-hidden="true"></span>
+                </a>
+              {%- else -%}
+                <div class="slideshow__button-cta slideshow__button-cta--desktop small--hide btn" tabindex="-1">
+                  <span class="slideshow__heading-cta-text"></span>
+                </div>
+              {%- endif -%}
+            {%- endunless -%}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <ul class="slideshow__navigation">
+        <li>
+          <button class="slideshow__navigation-item critical-hide" aria-label="{{ 'sections.slider.previous_slide' | t}}" disabled="disabled" data-slider-navigation data-slider-navigation-previous></button>
+        </li>
+        <li>
+          <button class="slideshow__navigation-item slideshow__button-next critical-hide" aria-label="{{ 'sections.slider.next_slide' | t}}" data-slider-navigation data-slider-navigation-next></button>
+        </li>
+      </ul>
+    {%- endif -%}
+  </div>
+
+  {%- if section.blocks.size > 1 -%}
+    <ol class="slideshow__indicators">
+      {%- for block in section.blocks -%}
+        <li>
+          <a href="#Slideshow-{{ section.id }}"
+             class="slideshow__indicator{% if forloop.first %} slideshow__indicator--active{% endif %} critical-clear"
+             data-slide-index="{{ forloop.index0 }}"
+             data-link-no-focus>
+            <span class="visually-hidden">{{ 'sections.slider.slide' | t: number: forloop.index }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ol>
+  {%- endif -%}
+  {%- if section.settings.slider_height == 'adapt' -%}
+    <div class="slideshow__text-container slideshow__text-container-mobile page-width">
+      {%- if section.blocks.size == 1 and first_block.settings.cta_link != blank -%}
+        <a href="{{ first_block.settings.cta_link }}" class="slideshow__button-cta-single medium-up--hide btn">
+          {{ first_block.settings.cta | escape }}
+        </a>
+      {%- endif -%}
+      {%- for block in section.blocks -%}
+        <div class="slideshow__text-content slideshow__text-content-mobile" data-animate>
+          {%- if block.settings.title != blank -%}
+            <h2 class="slideshow__heading h1">
+              {{ block.settings.title | escape }}
+            </h2>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <p id="slideshow-info" class="visually-hidden" aria-hidden="true">
+    {{- 'sections.slider.navigation_instructions' | t -}}
+  </p>
+</div>
+
+{% schema %}
+{
+  "name": {
+    "en": "Slideshow"
+  },
+  "class": "index-section",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "select",
+      "id": "slider_height",
+      "label": {
+        "en": "Slide height"
+      },
+      "info": {
+        "en": "Learn more about [slideshow guidelines](https://help.shopify.com/en/manual/using-themes/themes-by-shopify/narrative#slideshow-sections-specific)"
+      },
+      "options": [
+        {
+          "value": "full",
+          "label": {
+            "en": "Full screen"
+          }
+        },
+        {
+          "value": "adapt",
+          "label": {
+            "en": "Adapt to first slide"
+          }
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "center_cta",
+      "label": {
+        "en": "Center buttons"
+      },
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": {
+        "en": "Overlay"
+      }
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": {
+        "en": "Show overlay"
+      },
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": {
+        "en": "Overlay Color"
+      },
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "overlay_text",
+      "label": {
+        "en": "Text color"
+      },
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": {
+        "en": "Overlay opacity"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": {
+        "en": "%"
+      },
+      "default": 25
+    }
+  ],
+  "presets": [
+    {
+      "name": {
+        "en": "Slideshow"
+      },
+      "category": {
+        "en": "Image"
+      },
+      "settings": {
+        "slider_height": "adapt"
+      },
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": {
+        "en": "Image slide"
+      },
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Image"
+          }
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": {
+            "en": "Image alignment"
+          },
+          "default": "center center",
+          "options": [
+            {
+              "label": {
+                "en": "Top left"
+              },
+              "value": "top left"
+            },
+            {
+              "label": {
+                "en": "Top center"
+              },
+              "value": "top center"
+            },
+            {
+              "label": {
+                "en": "Top right"
+              },
+              "value": "top right"
+            },
+            {
+              "label": {
+                "en": "Middle left"
+              },
+              "value": "center left"
+            },
+            {
+              "label": {
+                "en": "Middle center"
+              },
+              "value": "center center"
+            },
+            {
+              "label": {
+                "en": "Middle right"
+              },
+              "value": "center right"
+            },
+            {
+              "label": {
+                "en": "Bottom left"
+              },
+              "value": "bottom left"
+            },
+            {
+              "label": {
+                "en": "Bottom center"
+              },
+              "value": "bottom center"
+            },
+            {
+              "label": {
+                "en": "Bottom right"
+              },
+              "value": "bottom right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text"
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Heading"
+          },
+          "default": {
+            "en": "Tell your story"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button",
+          "label": {
+            "en": "Slide title"
+          },
+          "default": {
+            "en": "Slide title"
+          },
+          "info": {
+            "en": "Required if you add more than one slide"
+          }
+        },
+        {
+          "type": "text",
+          "id": "cta",
+          "label": {
+            "en": "Button label"
+          },
+          "default": {
+            "en": "View more"
+          }
+        },
+        {
+          "type": "url",
+          "id": "cta_link",
+          "label": {
+            "en": "Button link"
+          }
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": {
+        "en": "Video slide"
+      },
+      "settings": [
+        {
+          "type": "video_url",
+          "id": "video_url",
+          "info": {
+            "en": "Best results if the video's aspect ratio is 16:9"
+          },
+          "label": {
+            "en": "Video link"
+          },
+          "accept": [
+            "youtube",
+            "vimeo"
+          ],
+          "default": {
+            "en": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+          }
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": {
+            "en": "Cover image"
+          },
+          "info": {
+            "en": "Always shown on mobile devices"
+          }
+        },
+        {
+          "type": "header",
+          "content": {
+            "en": "Text"
+          }
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": {
+            "en": "Heading"
+          },
+          "default": {
+            "en": "Slideshow video"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button",
+          "label": {
+            "en": "Slide title"
+          },
+          "default": {
+            "en": "Slide title"
+          },
+          "info": {
+            "en": "Only shows if you set more than one slide in the slideshow"
+          }
+        },
+        {
+          "type": "text",
+          "id": "cta",
+          "label": {
+            "en": "Button label"
+          },
+          "default": {
+            "en": "View more"
+          }
+        },
+        {
+          "type": "url",
+          "id": "cta_link",
+          "label": {
+            "en": "Button link"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
