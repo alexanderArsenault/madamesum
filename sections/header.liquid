@@ -1,4 +1,4 @@
-{% if section.settings.enable_transparent and request.page_type == 'index' %}
+{% if section.settings.enable_transparent and request.page_type == 'index'  or request.page_type == 'page' %}
   <style>
     html:not(.supports-no-js) body:not(.navigation-open) .site-header--transparent:not(.site-header--fixed) .burger-icon {
       background-color: {{ section.settings.transparent_text_color }};
@@ -19,10 +19,10 @@
     }
   </style>
 {% endif %}
-<div class="site-header{% if request.page_type == 'index' %} site-header--homepage{% if section.settings.enable_transparent %} site-header--transparent{% endif %}{% endif %}" data-section-id="{{ section.id }}" data-section-type="header-section" data-drawer-push {% if section.settings.enable_transparent and request.page_type == 'index' %} data-transparent-header="true"{% endif %}>
+<div class="site-header{% if request.page_type == 'index' or request.page_type == 'page' %} site-header--homepage{% if section.settings.enable_transparent %} site-header--transparent{% endif %}{% endif %}" data-section-id="{{ section.id }}" data-section-type="header-section" data-drawer-push {% if section.settings.enable_transparent and request.page_type == 'index' or request.page_type == 'page'%} data-transparent-header="true"{% endif %}>
   <header class="site-header__wrapper" role="banner">
     {% if section.settings.show_announcement %}
-      {% if section.settings.home_page_only == false or request.page_type == 'index' %}
+      {% if section.settings.home_page_only == false or request.page_type == 'index' or request.page_type == 'page'%}
         <style>
           .announcement-bar {
             background-color: {{ section.settings.announcement_color_bg }};
@@ -175,7 +175,7 @@
         Use the uploaded logo from theme settings if enabled.
         Site name gets precedence with `h1` tag on homepage, div on other pages.
         {% endcomment %}
-        {% if request.page_type == 'index' %}
+        {% if request.page_type == 'index' or request.page_type == 'page' %}
           <h1 class="site-header__logo-wrapper h4" itemscope itemtype="http://schema.org/Organization">
         {% else %}
           <div class="site-header__logo-wrapper h4" itemscope itemtype="http://schema.org/Organization">
@@ -193,11 +193,12 @@
 
             <img class="site-header__logo-image" src="{{ section.settings.logo | img_url: image_size }}" srcset="{{ section.settings.logo | img_url: image_size }} 1x, {{ section.settings.logo | img_url: image_size, scale: 2 }} 2x" alt="{{ section.settings.logo.alt | default: shop.name }}" itemprop="logo">
 
-            {% if request.page_type == 'index' and section.settings.enable_transparent %}
+            {% if request.page_type == 'index' or request.page_type == 'page' and section.settings.enable_transparent %}
               {% if section.settings.transparent_logo == blank %}
                 {%- assign transparent_logo = section.settings.logo -%}
               {% else %}
                 {%- assign transparent_logo = section.settings.transparent_logo -%}
+              <script>console.log('not transparent logo')</script>
               {% endif %}
 
               <img class="site-header__logo-image site-header__logo-image--transparent" src="{{ transparent_logo | img_url: image_size }}" srcset="{{ transparent_logo | img_url: image_size }} 1x, {{ transparent_logo | img_url: image_size, scale: 2 }} 2x" alt="{{ section.settings.logo.alt | default: shop.name }}"
@@ -208,7 +209,7 @@
           {% endif %}
         </a>
 
-        {% if request.page_type == 'index' %}
+        {% if request.page_type == 'index'  or request.page_type == 'page'%}
           </h1>
         {% else %}
           </div>
